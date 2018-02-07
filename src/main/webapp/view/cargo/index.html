@@ -48,10 +48,10 @@
                         <span class="glyphicon glyphicon-remove"></span>
                         <span>删除</span>
                     </button>
-                    <button class="btn btn-sm btn-default">
+                    <button class="btn btn-sm btn-default" id="activeCargo">
                         <span>激活</span>
                     </button>
-                    <button class="btn btn-sm btn-default">
+                    <button class="btn btn-sm btn-default" id="forbidCargo">
                         <span>禁用</span>
                     </button>
                     <button class="btn btn-sm btn-default" id="import_goods">
@@ -60,7 +60,7 @@
                     </button>
                     <button class="btn btn-sm btn-default">
                         <span class="glyphicon glyphicon-export"></span>
-                        <span>导出excel</span>
+                        <a href="/cargo/excelExport">导出excel</a>
                     </button>
                 </div>
                 <div class="col-md-9">
@@ -101,7 +101,7 @@
                             <td>#(cargo.supplies_create_time)</td>
                             <td>#(cargo.supplies_remark)</td>
                             <td>
-                                <button type="button" class="btn btn-info btn-xs" onclick="updateCargo('#(cargo)');">
+                                <button type="button" class="btn btn-info btn-xs" onclick="updateCargo('#(cargo)')">
                                     更新
                                 </button>
                             </td>
@@ -109,14 +109,15 @@
                         #end
                         </tbody>
                     </table>
+
+                        <div class="col-md-8">
+                            <!-- 分页 -->
+                            #@paginate(sharePage.pageNumber, sharePage.totalPage, "/share?p=")
+                        </div>
                 </div>
             </div>
 
-            <div class="row" style="margin-top: 15px">
-                <div class="col-md-8">
 
-                </div>
-            </div>
         </div>
 
     </div>
@@ -143,7 +144,7 @@
                             </div>
                             <div style="margin-top: 30px; margin-buttom: 15px">
                                 <a class="btn btn-info"
-                                   href="commons/fileSource/download/goodsInfo.xlsx"
+                                   href="cargo/modelExcel"
                                    target="_blank"> <span class="glyphicon glyphicon-download"></span>
                                     <span>下载</span>
                                 </a>
@@ -537,34 +538,60 @@
 <script type="text/javascript" src="/assets/jquery_form/jquery.form.js"></script>
 <script type="text/javascript">
 
+    var _unitId;
+    var import_step = 1;
+    var import_start = 1;
+    var import_end = 3;
+    var subBoxList;
+    var checkedIdList;
 
-    var _unitId = #(cargoUnitInfos.get(0).id);
     $(document).ready(function () {
 
+
+         _unitId = #(cargoUnitInfos.get(0).id);//设置默认单位Id
+         subBoxList = $('input[name="subBox"]');
+         checkedIdList = new Array();
+
         addGoodsAction();//添加货物监听动作
+        importGoodsAction();//导入excel
+        addCargoAction();//添加操作
+        delCargoAction();
+        activeCargoAction();
+        fabidCargoAction();
+        checkBoxAction();
 
-    /*    var options = {
-            beforeSubmit:  showRequest,  // 提交前
-            resetForm: true        // 成功提交后，重置所有的表单元素的值.
-        };*/
+        //更新
+        /*     $("#updateCargo").click(function () {
 
-       // $('#addCargo').ajaxForm(options);
+                 //forEach无法使用?
+                 var subBoxList = $('input[name="subBox"]');
+                 for (var i = 0; i < subBoxList.size(); i++) {
+
+                     if (subBoxList[i].checked) {
+                         console.log(subBoxList[i].value);
+                     }
+                 }
+
+             });*/
+
+
+    });
+
+
+    function addCargoAction() {
         $('#addCargo').ajaxForm({
-          //  beforeSubmit:  showRequest,
             dataType: "json",
             data: {
-                'unitId':_unitId
+                'unitId': _unitId
             },
-            clearForm:true,
+            clearForm: true,
+            resetForm: true,
             success: function (ret) {
-
                 $('#add_modal').modal("hide");
-
                 if (ret.code == 0) {
                     //todo dismiss 关闭框并且刷新数据
                     alert("添加成功.");
-                    window.location.reload();
-
+                    reloadPage();
                 }
             },
             error: function (ret) {
@@ -572,7 +599,210 @@
             }
 
         });
+    }
 
+    // 添加货物信息
+    function addGoodsAction() {
+        $('#add_goods').click(function () {
+
+            $('#add_modal').modal("show");
+        });
+    };
+
+    function delCargoAction() {
+
+        $("#delCargo").click(function () {
+
+            if(!verdictCheckBox()){
+                return;
+            }
+
+            $.ajax({
+                url: '/cargo/delCargo',
+                type: "POST",
+                cache: false,    // 经测试设置为 false 时，ajax 请求会自动追加一个参数 "&_=nnnnnnnnnnn"
+                dataType: "json", // "json" "text" "html" "jsonp"，如果设置为"html"，其中的script会被执行
+                data: {
+                    idList: checkedIdList
+                },
+                success: function (ret) {
+                    if (ret.state == "ok") {
+                        alert(ret.msg ? ret.msg : "操作成功");
+                        reloadPage();
+                    } else {
+                        alert("操作失败：" + (ret.msg ? ret.msg : "请告知管理员！"));
+                    }
+                }, error: function (XHR, msg) {
+                    //  showReplyErrorMsg(msg); // 默认调用
+                    console.log(msg);
+                }
+            });
+
+        });
+    }
+
+
+    /**
+     * 单位选择
+     * @param _unit_name
+     * @param _unit_id
+     */
+    function selectUnit(_unit_name, _unit_id) {
+
+        _unitId = _unit_id;
+        $("#selectedUnit").html(_unit_name);
+        $("#selectUnitId").val(_unit_id);
+    }
+
+
+    // 导入货物信息
+    function importGoodsAction() {
+        $('#import_goods').click(function () {
+            $('#import_modal').modal("show");
+        });
+
+        $('#previous').click(function () {
+            if (import_step > import_start) {
+                var preID = "step" + (import_step - 1)
+                var nowID = "step" + import_step;
+
+                $('#' + nowID).addClass("hide");
+                $('#' + preID).removeClass("hide");
+                import_step--;
+            }
+        })
+
+        $('#next').click(function () {
+            if (import_step < import_end) {
+                var nowID = "step" + import_step;
+                var nextID = "step" + (import_step + 1);
+
+                $('#' + nowID).addClass("hide");
+                $('#' + nextID).removeClass("hide");
+                import_step++;
+            }
+        })
+
+        $('#file').on("change", function () {
+            $('#previous').addClass("hide");
+            $('#next').addClass("hide");
+            $('#submit').removeClass("hide");
+        })
+
+        $('#submit').click(function () {
+            var nowID = "step" + import_end;
+            $('#' + nowID).addClass("hide");
+            $('#uploading').removeClass("hide");
+
+            // next
+            $('#confirm').removeClass("hide");
+            $('#submit').addClass("hide");
+
+            // ajax
+            $.ajaxFileUpload({
+                url: "cargo/excelImport",
+                secureuri: false,
+                dataType: 'json',
+                fileElementId: "file",
+                success: function (data, status) {
+                    var total = 0;
+                    var available = 0;
+                    var msg1 = "货物信息导入成功";
+                    var msg2 = "货物信息导入失败";
+                    var info;
+
+                    $('#import_progress_bar').addClass("hide");
+                    if (data.result == "success") {
+                        total = data.total;
+                        available = data.available;
+                        info = msg1;
+                        $('#import_success').removeClass('hide');
+                    } else {
+                        info = msg2
+                        $('#import_error').removeClass('hide');
+                    }
+                    info = info + ",总条数：" + total + ",有效条数:" + available;
+                    $('#import_result').removeClass('hide');
+                    $('#import_info').text(info);
+                    $('#confirm').removeClass('disabled');
+
+                }, error: function (data, status) {
+                    // handler error
+                    handleAjaxError(status);
+                }
+            })
+        })
+
+        $('#confirm').click(function () {
+            // modal dissmiss
+            //  importModalReset();
+            reloadPage();
+        })
+    }
+
+    function activeCargoAction() {
+
+        $("#activeCargo").click(function () {
+
+            if(!verdictCheckBox()){
+                return;
+            };
+
+            $.ajax({
+                url: '/cargo/activeCargo',
+                type: "POST",
+                cache: false,
+                dataType: "json",
+                data: {
+                    idList: checkedIdList
+                },
+                success: function (ret) {
+                    if (ret.state == "ok") {
+                        alert(ret.msg ? ret.msg : "操作成功");
+                        reloadPage();
+                    } else {
+                        alert("操作失败：" + (ret.msg ? ret.msg : "请告知管理员！"));
+                    }
+                }, error: function (XHR, msg) {
+                    //  showReplyErrorMsg(msg); // 默认调用
+                    console.log(msg);
+                }
+            });
+        });
+
+    }
+    function fabidCargoAction() {
+
+        $("#forbidCargo").click(function () {
+
+            if(!verdictCheckBox()){
+                return;
+            };
+
+            $.ajax({
+                url: '/cargo/forbidCargo',
+                type: "POST",
+                cache: false,
+                dataType: "json",
+                data: {
+                    idList: checkedIdList
+                },
+                success: function (ret) {
+                    if (ret.state == "ok") {
+                        alert(ret.msg ? ret.msg : "操作成功");
+                        reloadPage();
+                    } else {
+                        alert("操作失败：" + (ret.msg ? ret.msg : "请告知管理员！"));
+                    }
+                }, error: function (XHR, msg) {
+                    //  showReplyErrorMsg(msg); // 默认调用
+                    console.log(msg);
+                }
+            });
+        });
+
+    }
+    function checkBoxAction() {
         $("#checkAll").click(function () {
 
             $('input[name="subBox"]').prop("checked", this.checked);
@@ -582,90 +812,26 @@
         $subBox.click(function () {
             $("#checkAll").prop("checked", $subBox.length == $("input[name='subBox']:checked").length ? true : false);
         });
-
-
-        //更新
-        $("#updateCargo").click(function () {
-
-            //forEach无法使用?
-            var subBoxList = $('input[name="subBox"]');
-            for (var i = 0; i < subBoxList.size(); i++) {
-
-                if (subBoxList[i].checked) {
-                    console.log(subBoxList[i].value);
-                }
-            }
-
-        });
-
-
-        // 添加货物信息
-        function addGoodsAction() {
-            $('#add_goods').click(function () {
-
-                $('#add_modal').modal("show");
-            });
-        };
-
-        $("#delCargo").click(function(){
-
-
-            var subBoxList = $('input[name="subBox"]');
-            var checkedIdList = new Array();
-            for (var i = 0; i < subBoxList.size(); i++) {
-                if (subBoxList[i].checked) {
-                  //  console.log(subBoxList[i].value);
-                    checkedIdList.push(subBoxList[i].value)
-                   // delCargo(subBoxList[i]);
-                }
-            }
-
-            if(checkedIdList.length<=0){
-                alert("请选中要删除的文件");
-                return;
-            }
-
-            $.ajax({
-                url:'/cargo/delCargo',
-                type: "POST",
-                 cache: false  ,    // 经测试设置为 false 时，ajax 请求会自动追加一个参数 "&_=nnnnnnnnnnn"
-                 dataType: "json", // "json" "text" "html" "jsonp"，如果设置为"html"，其中的script会被执行
-                    data:{
-                        idList:checkedIdList
-                    },
-                 success: function(ret){
-                    if (ret.state == "ok") {
-                        alert(ret.msg ? ret.msg : "操作成功");
-                        window.location.reload();
-                    } else {
-                        alert("操作失败：" + (ret.msg ? ret.msg : "请告知管理员！"));
-                    }
-                }, error: function(XHR, msg) {
-                  //  showReplyErrorMsg(msg); // 默认调用
-                    console.log(msg);
-                }
-            });
-
-        });
-
-    });
-
-    updateCargo = function (_cargo) {
-
-        $('#edit_modal').modal("show");
     }
-
-    function selectUnit(_unit_name, _unit_id) {
-
-        _unitId = _unit_id;
-
-        console.log(_unit_id);
+    function verdictCheckBox() {
 
 
-        $("#selectedUnit").html(_unit_name);
-        $("#selectUnitId").val(_unit_id);
-
-
+        for (var i = 0; i < subBoxList.size(); i++) {
+            if (subBoxList[i].checked) {
+                checkedIdList.push(subBoxList[i].value)
+            }
+        }
+        if (checkedIdList.length <= 0) {
+            alert("请选中要操作的内容");
+            return false;
+        }
+        return true;
+    }
+    /**
+     * 重新加载页面
+     */
+    function reloadPage() {
+        window.location.reload();
     }
 </script>
 #end

@@ -59,7 +59,7 @@ public class CommonConfig extends JFinalConfig{
     public void configEngine(Engine me) {
             me.setDevMode(p.getBoolean("engineDevMode"));
         me.addSharedFunction("/view/common/mainPage.html");
-       // me.addSharedFunction("/view/common/_paginate.html");
+        me.addSharedFunction("/view/common/_paginate.html");
     }
 
     @Override

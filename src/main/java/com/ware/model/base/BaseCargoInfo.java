@@ -58,7 +58,6 @@ public abstract class BaseCargoInfo<M extends BaseCargoInfo<M>> extends Model<M>
         set("del_status", status);
     }
 
-
     @Override
     public String toString() {
         return "BaseCargoInfo{}";

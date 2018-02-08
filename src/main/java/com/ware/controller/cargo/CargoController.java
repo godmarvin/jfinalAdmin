@@ -2,6 +2,7 @@ package com.ware.controller.cargo;
 
 import com.jfinal.core.Controller;
 import com.jfinal.kit.Ret;
+import com.jfinal.plugin.activerecord.Page;
 import com.jfinal.upload.UploadFile;
 import com.ware.commonUtils.ExcelExportUtil;
 import com.ware.model.CargoInfo;
@@ -18,12 +19,7 @@ public class CargoController extends Controller {
 
     public void index() {
 
-        Ret ret = cs.findCargo();
-        setAttr("sharePage", cs.paginate(getParaToInt("p", 1)));
-        setAttr("cargoList", ret.get("data"));
-
-        getUnit();
-        render("index.html");
+        findCargo();
 
     }
 
@@ -54,10 +50,38 @@ public class CargoController extends Controller {
     /**
      * todo 更新操作会放到另外一个页面中去
      */
-    public void editCargo() {
+    public void renderEditCargo() {
 
+        getUnit();
+        Integer cargoId = getParaToInt("cargoId");
+
+        CargoInfo cargoInfo = cs.editCargo(cargoId);
+
+        setAttr("cargoInfo",cargoInfo);
+        render("editCargo.html");
     }
 
+    public void editCargo(){
+
+        CargoInfo cargoInfo = new CargoInfo();
+        cargoInfo.setId(getParaToInt("id"));
+        cargoInfo.setSuppliesOrderNo(getPara("goods_code"));
+        cargoInfo.setName(getPara("goods_name"));
+        cargoInfo.setType(getPara("goods_type"));
+        cargoInfo.setUnit(getParaToInt("unitId"));
+        cargoInfo.setSpec(getPara("goods_spec"));
+        //cargoInfo.setCreateTime(new Date());
+        cargoInfo.setUpdateTime(new Date());
+        cargoInfo.setSuppliesStatus(getParaToInt("status"));
+        cargoInfo.setSuppliesRemark(getPara("goods_remark"));
+        cargoInfo.setSuppliesDelStatus(1);//删除状态1:正常状态;0已经删除
+        if (cargoInfo.update()){
+            renderJson(Ret.ok());
+        }else {
+            renderJson(Ret.fail());
+        }
+
+    }
     /**
      * 删除
      */
@@ -81,13 +105,21 @@ public class CargoController extends Controller {
      */
     public void findCargo() {
 
+        getUnit();
+        Page<CargoInfo> cargoInfoPage = new Page<CargoInfo>();
+        Integer pageNumber = getParaToInt("p", 1);
 
-        Ret ret = cs.findCargo();
-        if (ret.isOk()) {
-            renderJson(ret);
-        } else {
-            renderJson(ret);
+        if(getPara("input")==null){
+            cargoInfoPage = cs.paginate(pageNumber);
+        }else {
+            Integer type = getParaToInt("type");
+            String inputName = getPara("input");
+            cargoInfoPage =  cs.searchCargo(type,inputName,pageNumber);
         }
+
+        setAttr("sharePage", cargoInfoPage);
+        setAttr("cargoList", cargoInfoPage.getList());
+        render("index.html");
     }
 
     /**
@@ -119,35 +151,36 @@ public class CargoController extends Controller {
     /**
      * 导入数据
      */
-   public void excelImport(){
-       UploadFile file = getFile("file");
-       Ret ret = cs.excelImport(file);
+    public void excelImport() {
+        UploadFile file = getFile("file");
+        Ret ret = cs.excelImport(file);
 
-       ret.put("result","success");
-       renderJson(ret);
-   }
+        ret.put("result", "success");
+        renderJson(ret);
+    }
 
     /**
      * 激活操作
      */
-   public void activeCargo(){
+    public void activeCargo() {
 
-       String[] idList = getParaValues("idList[]");
-       renderJson(cs.activeCargo(idList));
-   }
+        String[] idList = getParaValues("idList[]");
+        renderJson(cs.activeCargo(idList));
+    }
 
     /**
      * 禁用操作
      */
-   public void forbidCargo(){
-       String[] idList = getParaValues("idList[]");
-       renderJson(cs.forbidCargo(idList));
-   }
+    public void forbidCargo() {
+        String[] idList = getParaValues("idList[]");
+        renderJson(cs.forbidCargo(idList));
+    }
 
     /**
      * 删除回收站数据
      */
-   public void delTrash(){
+    public void delTrash() {
 
-   }
+    }
+
 }

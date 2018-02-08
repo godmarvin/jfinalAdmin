@@ -1,0 +1,163 @@
+#set(setTitle="货物信息")
+#@layout()
+#define css()
+<!--<link type="text/css" rel="stylesheet" href="/assets/prettify/sunburst-by-james-for-prettify.css" />-->
+<!--<link type="text/css" rel="stylesheet" href="/assets/prettify/_darcula-from-highlight-js-by-james.css">-->
+<link type="text/css" rel="stylesheet" href="/assets/css/jfinal-com-v1.0.css">
+<!--<link type="text/css" rel="stylesheet" href="/assets/highlight/darcula-by-james.css">-->
+#end
+#define main()
+<!-- 编辑货物信息模态框 -->
+<div class="panel panel-default" id="cargoInfo">
+
+    <ol class="breadcrumb">
+        <li>货物信息管理</li>
+    </ol>
+    <div class="modal-body">
+      <!-- id, supplies_order_no, supplies_name, supplies_type, supplies_unit, supplies_spec, supplies_create_time, supplies_update_time, supplies_status, supplies_remark, del_status, unit_name-->
+        <div class="row">
+            <div class="col-md-1 col-sm-1"></div>
+            <div class="col-md-8 col-sm-8">
+                <form id="updateCargo" class="form-horizontal" action="/cargo/editCargo" method="post" role="form"
+                      style="margin-top: 25px">
+                    <div class="form-group">
+                        <label class="control-label col-md-4 col-sm-4"> <span>货物编码：</span>
+                        </label>
+                        <div class="col-md-8 col-sm-8">
+                            <input type="text" class="form-control"
+                                   name="goods_code" placeholder="货物编码" value="#(cargoInfo.supplies_order_no)">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-md-4 col-sm-4"> <span>货物品名：</span>
+                        </label>
+                        <div class="col-md-8 col-sm-8">
+                            <input type="text" class="form-control" value="#(cargoInfo.supplies_name)"
+                                   name="goods_name" placeholder="货物品名">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-md-4 col-sm-4"> <span>货物类别：</span>
+                        </label>
+                        <div class="col-md-8 col-sm-8">
+                            <input type="text" class="form-control" value="#(cargoInfo.supplies_type)"
+                                   name="goods_type" placeholder="货物类别">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-md-4 col-sm-4"> <span>货物规格：</span>
+                        </label>
+                        <div class="col-md-8 col-sm-8">
+                            <input type="text" class="form-control" value="#(cargoInfo.supplies_spec)"
+                                   name="goods_spec" placeholder="货物规格">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                    <label class="col-sm-3 control-label">选择单位</label>
+                    <div class="col-sm-3 btn-group">
+                        <button id="selectedUnit" class="btn btn-default dropdown-toggle" type="button"
+                                data-toggle="dropdown" aria-haspopup="true"
+                                aria-expanded="true">#(cargoInfo.unit_name)
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+                            #for(unit : cargoUnitInfos)
+                            <li><a style="cursor: pointer"
+                                   onclick="selectUnit('#(unit.unit_name)','#(unit.id)')">#(unit.unit_name)</a>
+                            </li>
+                            #end
+                        </ul>
+                    </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-md-4 col-sm-4"> <span>货物备注：</span>
+                        </label>
+                        <div class="col-md-8 col-sm-8">
+                            <input type="text" class="form-control" value="#(cargoInfo.supplies_remark)"
+                                   name="goods_remark" placeholder="货物备注">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-md-4 col-sm-4"> <span>货物状态：</span>
+                        </label>
+                        <div class="col-md-8 col-sm-8">
+                            <div class="col-sm-4">
+                                <input type="radio" value="1" name="status" id="valid"  v-model="status">
+                                <label>有效</label>
+                                <input type="radio" value="0" name="status" id="invalid"   v-model="status">
+                                <label>无效</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-default" type="button" data-dismiss="modal">
+                            <span>取消</span>
+                        </button>
+                        <button class="btn btn-success" type="submit" id="edit_modal_submit">
+                            <span>提交</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="col-md-1 col-sm-1"></div>
+        </div>
+    </div>
+
+</div>
+
+#end
+#define js()
+<script type="text/javascript" src="/assets/jquery_form/jquery.form.js"></script>
+<script type="text/javascript" src="/assets/prettify/prettify.js"></script>
+<script type="text/javascript">
+
+    var _unitId = #(cargoInfo.supplies_unit);
+
+    $(document).ready(function () {
+
+        updateCargoAction();
+      //  $("input[name='status']").removeAttr("checked");
+
+       // alert(#(cargoInfo.supplies_status) ==1);
+        if(#(cargoInfo.supplies_status) ==1 ){
+            $("#valid").attr("checked","checked");
+        }else {
+            $("#invalid").attr("checked","checked");
+        }
+
+    });
+    function updateCargoAction() {
+        $('#updateCargo').ajaxForm({
+            dataType: "json",
+            data: {
+                'unitId': _unitId,
+                "id":#(cargoInfo.id)
+
+            },
+            clearForm: true,
+            resetForm: true,
+            success: function (ret) {
+                $('#add_modal').modal("hide");
+                if (ret.state == 'ok') {
+                    //todo dismiss 关闭框并且刷新数据
+                    alert("修改成功");
+                  //  window.history.go(-1);
+                    window.location.href = '/cargo'
+                }
+            },
+            error: function (ret) {
+                console.log(JSON.stringify(ret));
+            }
+
+        });
+    }
+    /**
+     * 单位选择
+     * @param _unit_name
+     * @param _unit_id
+     */
+    function selectUnit(_unit_name, _unit_id) {
+        _unitId = _unit_id;
+        $("#selectedUnit").html(_unit_name);
+    }
+</script>
+#end

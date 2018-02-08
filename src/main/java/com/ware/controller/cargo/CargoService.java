@@ -25,6 +25,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.ware.config.CommonConfig.pageSize;
+
 public class CargoService {
 
     public static final CargoService me = new CargoService();
@@ -44,21 +46,7 @@ public class CargoService {
 
     }
 
-    public Ret findCargo() {
-
-
-        List<CargoInfo> cargoInfoList = cargoDao.find("SELECT s.* , u.unit_name FROM warehouse.supplies s,warehouse.supplies_unit u WHERE s.supplies_unit = u.id and `del_status`='1';");
-
-        if (cargoInfoList.isEmpty()) {
-
-            Ret.fail("msg", "没有找到数据");
-        }
-
-        return Ret.ok("data", cargoInfoList);
-    }
-
     public Ret findUnits() {
-
 
         List<CargoUnitInfo> unitInfos = cargoUnitInfo.find("SELECT * FROM warehouse.supplies_unit;");
 
@@ -231,10 +219,48 @@ public class CargoService {
 
     }
 // ("SELECT s.* , u.unit_name FROM warehouse.supplies s,warehouse.supplies_unit u WHERE s.supplies_unit = u.id and `del_status`='1';");
-    public Object paginate(int pageNumber) {
-        Page<CargoInfo> cargoInfoPage = cargoDao.paginate(pageNumber, 5,"SELECT s.* , u.unit_name","FROM warehouse.supplies s,warehouse.supplies_unit u WHERE s.supplies_unit = u.id and `del_status`='1'");
+    public Page<CargoInfo> paginate(int pageNumber) {
+        Page<CargoInfo> cargoInfoPage = cargoDao.paginate(pageNumber, pageSize,"SELECT s.* , u.unit_name","FROM warehouse.supplies s,warehouse.supplies_unit u WHERE s.supplies_unit = u.id and `del_status`='1'");
         // 列表页显示 content 的摘要信息需要过滤为纯文本，去除所有标记
        // JsoupFilter.filterArticleList(sharePage.getList(), 50, 120);
         return cargoInfoPage;
+    }
+
+    public Page<CargoInfo> searchCargo(Integer type,String inputName,Integer pageNumber){
+
+
+
+        String sqlType = new String();
+
+
+        switch (type){
+            case 0:
+                sqlType = "supplies_order_no";
+                break;
+            case 1:
+                sqlType = "supplies_name";
+                break;
+            case 2:
+                sqlType = "supplies_name";//todo 查询全部需要对数据的字段先进行拼接组合再进行查询
+                break;
+        }
+
+        Page<CargoInfo> cargoInfoPage = cargoDao.paginate(pageNumber,pageSize,"SELECT s.* , u.unit_name ",
+                "FROM warehouse.supplies s,warehouse.supplies_unit u " +
+                "WHERE s.supplies_unit = u.id " +
+                "and  `del_status`='1' " +
+                "and `"+sqlType+"` LIKE '%"+inputName+"%'");
+
+        return cargoInfoPage;
+    }
+
+    public CargoInfo editCargo(Integer cargoId){
+
+       CargoInfo cargoInfo =  cargoDao.findFirst("SELECT s.* , u.unit_name FROM warehouse.supplies s,warehouse.supplies_unit u WHERE s.supplies_unit = u.id and  `del_status`='1' AND s.id = '"+cargoId+"'");
+
+
+
+        return cargoInfo;
+
     }
 }

@@ -22,6 +22,8 @@ import java.sql.Connection;
 public class CommonConfig extends JFinalConfig{
 
    private static Prop p = PropKit.use("sql/config_dev.txt");
+   public static Integer pageSize =  5;
+
 
     private WallFilter wallFilter;
 

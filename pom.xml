@@ -17,8 +17,6 @@
         <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
     </properties>
 
-
-
     <!--定义编译相关内容-->
     <!-- 使用阿里 maven 库 -->
     <repositories>

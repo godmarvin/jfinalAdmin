@@ -1,7 +1,13 @@
 #主要配置
-jdbcUrl=jdbc:mysql://localhost/warehouse?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true
+#jdbcUrl=jdbc:mysql://localhost/warehouse?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true
+#user=root
+#password=GodMarvin
+#devMode=true
+#engineDevMode=true
+
+jdbcUrl=jdbc:mysql://139.199.81.130/wharehouse?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true
 user=root
-password=GodMarvin
+password=123456
 devMode=true
 engineDevMode=true
 

@@ -36,6 +36,10 @@ public class CommonConfig extends JFinalConfig{
         /**
          * 特别注意：IDEA 之下建议的启动方式，仅比 eclipse 之下少了最后一个参数
          */
+        /**
+         * 对于有module的项目需要添加module的名称
+         *http://www.jfinal.com/share/674
+         */
 
        JFinal.start("src/main/webapp", 8089, "/");
 

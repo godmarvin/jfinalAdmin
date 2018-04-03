@@ -35,7 +35,7 @@ public class CargoController extends Controller {
         cargoInfo.setUpdateTime(new Date());
         cargoInfo.setSuppliesStatus(getParaToInt("status"));
         cargoInfo.setSuppliesRemark(getPara("goods_remark"));
-        cargoInfo.setSuppliesDelStatus(1);//删除状态1:正常状态;0已经删除
+        cargoInfo.setSuppliesDelStatus(1);//删除状态;1:正常状态;0已经删除
 
         Ret ret = cs.addCargo(cargoInfo);
 
@@ -57,11 +57,11 @@ public class CargoController extends Controller {
 
         CargoInfo cargoInfo = cs.editCargo(cargoId);
 
-        setAttr("cargoInfo",cargoInfo);
+        setAttr("cargoInfo", cargoInfo);
         render("editCargo.html");
     }
 
-    public void editCargo(){
+    public void editCargo() {
 
         CargoInfo cargoInfo = new CargoInfo();
         cargoInfo.setId(getParaToInt("id"));
@@ -70,18 +70,18 @@ public class CargoController extends Controller {
         cargoInfo.setType(getPara("goods_type"));
         cargoInfo.setUnit(getParaToInt("unitId"));
         cargoInfo.setSpec(getPara("goods_spec"));
-        //cargoInfo.setCreateTime(new Date());
         cargoInfo.setUpdateTime(new Date());
         cargoInfo.setSuppliesStatus(getParaToInt("status"));
         cargoInfo.setSuppliesRemark(getPara("goods_remark"));
         cargoInfo.setSuppliesDelStatus(1);//删除状态1:正常状态;0已经删除
-        if (cargoInfo.update()){
+        if (cargoInfo.update()) {
             renderJson(Ret.ok());
-        }else {
+        } else {
             renderJson(Ret.fail());
         }
 
     }
+
     /**
      * 删除
      */
@@ -109,12 +109,16 @@ public class CargoController extends Controller {
         Page<CargoInfo> cargoInfoPage = new Page<CargoInfo>();
         Integer pageNumber = getParaToInt("p", 1);
 
-        if(getPara("input")==null){
+        if (getPara("input") == null) {
             cargoInfoPage = cs.paginate(pageNumber);
-        }else {
+        } else {
             Integer type = getParaToInt("type");
             String inputName = getPara("input");
-            cargoInfoPage =  cs.searchCargo(type,inputName,pageNumber);
+            cargoInfoPage = cs.searchCargo(type, inputName, pageNumber);
+        }
+        while (cargoInfoPage.getList().size() == 0) {
+
+            cargoInfoPage = cs.paginate(pageNumber - 1);
         }
 
         setAttr("sharePage", cargoInfoPage);
@@ -126,7 +130,6 @@ public class CargoController extends Controller {
      * 获取规格
      */
     public void getUnit() {
-
 
         Ret ret = cs.findUnits();
 

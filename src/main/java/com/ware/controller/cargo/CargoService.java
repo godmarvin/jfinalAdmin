@@ -218,22 +218,19 @@ public class CargoService {
         }
 
     }
-// ("SELECT s.* , u.unit_name FROM warehouse.supplies s,warehouse.supplies_unit u WHERE s.supplies_unit = u.id and `del_status`='1';");
+
+    // ("SELECT s.* , u.unit_name FROM warehouse.supplies s,warehouse.supplies_unit u WHERE s.supplies_unit = u.id and `del_status`='1';");
     public Page<CargoInfo> paginate(int pageNumber) {
-        Page<CargoInfo> cargoInfoPage = cargoDao.paginate(pageNumber, pageSize,"SELECT s.* , u.unit_name","FROM warehouse.supplies s,warehouse.supplies_unit u WHERE s.supplies_unit = u.id and `del_status`='1'");
-        // 列表页显示 content 的摘要信息需要过滤为纯文本，去除所有标记
-       // JsoupFilter.filterArticleList(sharePage.getList(), 50, 120);
+        Page<CargoInfo> cargoInfoPage = cargoDao.paginate(pageNumber, pageSize, "SELECT s.* , u.unit_name", "FROM warehouse.supplies s,warehouse.supplies_unit u WHERE `del_status`='1' order by s.supplies_create_time DESC");
+
         return cargoInfoPage;
     }
 
-    public Page<CargoInfo> searchCargo(Integer type,String inputName,Integer pageNumber){
-
-
+    public Page<CargoInfo> searchCargo(Integer type, String inputName, Integer pageNumber) {
 
         String sqlType = new String();
 
-
-        switch (type){
+        switch (type) {
             case 0:
                 sqlType = "supplies_order_no";
                 break;
@@ -245,19 +242,18 @@ public class CargoService {
                 break;
         }
 
-        Page<CargoInfo> cargoInfoPage = cargoDao.paginate(pageNumber,pageSize,"SELECT s.* , u.unit_name ",
+        Page<CargoInfo> cargoInfoPage = cargoDao.paginate(pageNumber, pageSize, "SELECT s.* , u.unit_name ",
                 "FROM warehouse.supplies s,warehouse.supplies_unit u " +
-                "WHERE s.supplies_unit = u.id " +
-                "and  `del_status`='1' " +
-                "and `"+sqlType+"` LIKE '%"+inputName+"%'");
+                        "WHERE s.supplies_unit = u.id " +
+                        "and  `del_status`='1' " +
+                        "and `" + sqlType + "` LIKE '%" + inputName + "%'");
 
         return cargoInfoPage;
     }
 
-    public CargoInfo editCargo(Integer cargoId){
+    public CargoInfo editCargo(Integer cargoId) {
 
-       CargoInfo cargoInfo =  cargoDao.findFirst("SELECT s.* , u.unit_name FROM warehouse.supplies s,warehouse.supplies_unit u WHERE s.supplies_unit = u.id and  `del_status`='1' AND s.id = '"+cargoId+"'");
-
+        CargoInfo cargoInfo = cargoDao.findFirst("SELECT s.* , u.unit_name FROM warehouse.supplies s,warehouse.supplies_unit u WHERE s.supplies_unit = u.id and  `del_status`='1' AND s.id = '" + cargoId + "'");
 
 
         return cargoInfo;

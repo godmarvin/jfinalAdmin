@@ -1,15 +1,10 @@
 #主要配置
-#jdbcUrl=jdbc:mysql://localhost/warehouse?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true
-#user=root
-#password=GodMarvin
-#devMode=true
-#engineDevMode=true
-
-jdbcUrl=jdbc:mysql://139.199.81.130/wharehouse?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true
+jdbcUrl=jdbc:mysql://localhost/warehouse?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true
 user=root
-password=123456
+password=GodMarvin
 devMode=true
 engineDevMode=true
+
 
 # 指定管理员账号，多个管理员用逗号分隔 --------------------------------
 admin = test@test.com, otherAdmin@test.com

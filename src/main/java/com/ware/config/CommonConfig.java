@@ -3,6 +3,7 @@ package com.ware.config;
 import com.alibaba.druid.filter.stat.StatFilter;
 import com.alibaba.druid.wall.WallFilter;
 import com.jfinal.core.JFinal;
+import com.jfinal.ext.handler.ContextPathHandler;
 import com.jfinal.json.MixedJsonFactory;
 import com.jfinal.kit.Prop;
 import com.jfinal.kit.PropKit;
@@ -22,7 +23,7 @@ import java.sql.Connection;
 public class CommonConfig extends JFinalConfig{
 
    private static Prop p = PropKit.use("sql/config_dev.txt");
-   public static Integer pageSize =  5;
+   public static Integer pageSize =  10;
 
 
     private WallFilter wallFilter;
@@ -106,5 +107,6 @@ public class CommonConfig extends JFinalConfig{
     @Override
     public void configHandler(Handlers me) {
 
+        me.add(new ContextPathHandler("contextPath"));
     }
 }

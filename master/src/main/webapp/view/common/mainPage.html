@@ -1,0 +1,185 @@
+#define layout()
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>仓库管理系统</title>
+    <link rel="stylesheet" type="text/css"
+          href="/assets/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css"
+          href="/assets/css/bootstrap-table.css">
+    <link rel="stylesheet" type="text/css"
+          href="/assets/css/bootstrap-datetimepicker.min.css">
+    <link rel="stylesheet" type="text/css"
+          href="/assets/css/jquery-ui.css">
+    <link rel="stylesheet" type="text/css"
+          href="/assets/css/jquery.mloading.css">
+    <link rel="stylesheet" type="text/css"
+          href="/assets/css/mainPage.css">
+
+    ### 模板函数安全调用，找到 css() 模板函数则调用，找不到则直接跳过
+    ### 适合于部分页面在 layout.html 提供的 css 文件之外，还需额外添加 css 资源的应用场景
+    #@css?()
+</head>
+<body>
+
+<!-- 导航栏 -->
+<div id="navBar">
+    <!-- 此处加载顶部导航栏 -->
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+        <div class="container-fluid">
+            <!-- 导航栏标题 -->
+            <div class="navbar-header">
+                <a href="javascript:void(0)" class="navbar-brand home">仓库管理系统</a>
+            </div>
+
+            <!-- 导航栏下拉菜单；用户信息与注销登陆 -->
+            <div>
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle"
+                           data-toggle="dropdown"> <span class="glyphicon glyphicon-user"></span>
+                            <span>欢迎&nbsp;</span> <span id="nav_userName">用户名:1234</span>
+                            <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a href="#" id="editInfo"> <span
+                                        class="glyphicon glyphicon-pencil"></span> &nbsp;&nbsp;修改个人信息</a></li>
+                            <li>
+                                <a href="javascript:void(0)" id="signOut"> <span
+                                        class="glyphicon glyphicon-off"></span> &nbsp;&nbsp;注销登录
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</div>
+
+<div class="container-fluid" style="padding-left: 0px;">
+    <div class="row">
+        <!-- 左侧导航栏 -->
+        <div id="sideBar" class="col-md-2 col-sm-3">
+            <!--  此处加载左侧导航栏 -->
+            <!-- 左侧导航栏  -->
+            <div class="panel-group" id="accordion">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">
+                            <a href="#collapse1" data-toggle="collapse" data-parent="#accordion"
+                               class="parentMenuTitle collapseHead">库存管理</a>
+                            <div class="pull-right">
+                                <span class="caret"></span>
+                            </div>
+                        </h4>
+                    </div>
+                    <div id="collapse1" class="panel-collapse collapse collapseBody">
+                        <div class="panel-body">
+                            <ul class="list-group">
+                                <li class="list-group-item">
+                                    <a href="javascript:void(0)" class="menu_item"
+                                       name="pagecomponent/storageManagementCommon.jsp">库存查询</a>
+                                </li>
+                                <li class="list-group-item">
+                                    <a href="javascript:void(0)"
+                                       class="menu_item"
+                                       name="pagecomponent/stockRecordManagement.jsp">出入库记录</a>
+                                </li>
+
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">
+                            <a href="#collapse2" data-toggle="collapse" data-parent="#accordion"
+                               class="parentMenuTitle collapseHead">出入库管理</a>
+                            <div class="pull-right">
+                                <span class="caret"></span>
+                            </div>
+                        </h4>
+                    </div>
+                    <div id="collapse2" class="panel-collapse collapse collapseBody in">
+                        <div class="panel-body">
+                            <ul class="list-group">
+                                <li class="list-group-item">
+                                    <a href="javascript:void(0)" class="menu_item"
+                                       name="pagecomponent/stock-inManagement.jsp">货物入库</a>
+                                </li>
+                                <li class="list-group-item">
+                                    <a href="javascript:void(0)" class="menu_item"
+                                       name="pagecomponent/stock-outManagement.jsp">货物出库</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">
+                            <a href="#collapse4" data-toggle="collapse" data-parent="#accordion"
+                               class="parentMenuTitle collapseHead">基础数据</a>
+                            <div class="pull-right	">
+                                <span class="caret"></span>
+                            </div>
+                        </h4>
+                    </div>
+                    <div id="collapse4" class="panel-collapse collapse collapseBody">
+                        <div class="panel-body">
+                            <ul class="list-group">
+
+                                <li class="list-group-item">
+                                    <a href="/cargo" class="menu_item">货物信息管理</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 中部主体容器 -->
+        <div class="jf-body-box clearfix">
+            #@main()
+        </div>
+    </div>
+</div>
+</body>
+<script type="text/javascript"
+        src="/assets/js/jquery-2.2.3.min.js"></script>
+<script type="text/javascript"
+        src="/assets/js/bootstrap.min.js"></script>
+<script type="text/javascript"
+        src="/assets/js/jquery-ui.min.js"></script>
+<script type="text/javascript"
+        src="/assets/js/bootstrapValidator.min.js"></script>
+<script type="text/javascript"
+        src="/assets/js/bootstrap-table.min.js"></script>
+<script type="text/javascript"
+        src="/assets/js/bootstrap-table-zh-CN.min.js"></script>
+<script type="text/javascript"
+        src="/assets/js/jquery.md5.js"></script>
+<script type="text/javascript"
+        src="/assets/js/jquery.mloading.js"></script>
+<script type="text/javascript"
+        src="/assets/js/mainPage.js"></script>
+<script type="text/javascript"
+        src="/assets/js/ajaxfileupload.js"></script>
+<script type="text/javascript"
+        src="/assets/js/bootstrap-datetimepicker.min.js"></script>
+<script type="text/javascript"
+        src="/assets/js/bootstrap-datetimepicker.zh-CN.js"></script>
+
+### 模板函数安全调用，找到 js() 模板函数则调用，找不到则直接跳过
+### 适合于部分页面在 layout.html 提供的 js 文件之外，还需额外添加 js 资源的应用场景
+#@js?()
+</html>
+
+#end
